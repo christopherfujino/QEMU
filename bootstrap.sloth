@@ -1,6 +1,12 @@
 #!/usr/bin/env sloth
 
-# from https://wiki.archlinux.org/title/KVM
+# from:
+#   - https://wiki.archlinux.org/title/KVM
+#   - https://wiki.archlinux.org/title/QEMU
+
+let localArchImagePath = 'arch.qcow2'
+let localArchImageShaPath = 'arch.qcow2.SHA256'
+let localDriveImagePath = 'drive.raw'
 
 func testKVM() {
   # test for CPU hardware support
@@ -17,6 +23,53 @@ func testKVM() {
   'lsmod' | 'grep kvm'!
 }
 
+func testQEMU() {
+  'which qemu-img'!
+}
+
+# TODO: setup an overlay storage image:
+# - https://wiki.archlinux.org/title/QEMU#Overlay_storage_images
+func bootstrapDisk() {
+  if not File(localDriveImagePath).exists() {
+    # Using `dd` would be faster specifically for 'raw'...
+    ['qemu-img', 'create',
+      # qemu image format, 'qcow2' (copy on write) is more storage-efficient
+      '-f', 'raw',
+      localDriveImagePath,
+      '10G',
+    ]!
+  }
+}
+
+func downloadIfNotPresent(remotePath, localPath) {
+  if File(localPath).exists() {
+    print("not downloading ${localPath} because it already exists")
+    return
+  }
+
+  ['curl', '-L', remotePath, '-o', localPath]!
+}
+
+func bootstrapArch() {
+  downloadIfNotPresent(
+    'https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/13560/download',
+    localArchImagePath,
+  )
+  downloadIfNotPresent(
+    'https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/13561/download',
+    localArchImageShaPath,
+  )
+
+  let actualSha = (['sha256sum', localArchImagePath]&!).stdout.split(' ')[0]
+  let correctSha = (<- localArchImageShaPath).split(' ')[0]
+  if actualSha != correctSha {
+    throw "${actualSha} != ${correctSha}"
+  }
+}
+
 with ($cwd = $scriptDir) {
   testKVM()
+  testQEMU()
+  bootstrapDisk()
+  bootstrapArch()
 }

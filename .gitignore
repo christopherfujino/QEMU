@@ -1,0 +1,5 @@
+*.stamp
+*.raw
+*.qcow2
+*.img
+*.SHA256
