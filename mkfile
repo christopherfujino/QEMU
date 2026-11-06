@@ -1,0 +1,2 @@
+run:V:
+  ./bootstrap.sloth

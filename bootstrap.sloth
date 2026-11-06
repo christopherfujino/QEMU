@@ -1,0 +1,22 @@
+#!/usr/bin/env sloth
+
+# from https://wiki.archlinux.org/title/KVM
+
+func testKVM() {
+  # test for CPU hardware support
+  with ($env = $env.merge({'LC_ALL': 'C.UTF-8'})) {
+    'lscpu' | 'grep Virtualization'!
+  }
+
+  # test for kernel support
+  # - zgrep will grep a compressed file
+  # - only 'y' or 'm' values mean module is available
+  ['zgrep', 'CONFIG_KVM=[ym]', '/proc/config.gz']!
+
+  # test modules are loaded
+  'lsmod' | 'grep kvm'!
+}
+
+with ($cwd = $scriptDir) {
+  testKVM()
+}
