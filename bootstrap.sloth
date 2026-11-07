@@ -7,6 +7,7 @@
 let localArchImagePath = 'arch.qcow2'
 let localArchImageShaPath = 'arch.qcow2.SHA256'
 let localDriveImagePath = 'drive.raw'
+let qemuBinary = 'qemu-system-x86_64'
 
 func testKVM() {
   # test for CPU hardware support
@@ -21,10 +22,6 @@ func testKVM() {
 
   # test modules are loaded
   'lsmod' | 'grep kvm'!
-}
-
-func testQEMU() {
-  'which qemu-img'!
 }
 
 # TODO: setup an overlay storage image:
@@ -52,13 +49,14 @@ func downloadIfNotPresent(remotePath, localPath) {
 
 func bootstrapArch() {
   downloadIfNotPresent(
+    #'https://mirrors.ocf.berkeley.edu/archlinux/iso/2026.11.01/archlinux-2026.11.01-x86_64.iso',
     'https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/13560/download',
     localArchImagePath,
   )
-  downloadIfNotPresent(
-    'https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/13561/download',
-    localArchImageShaPath,
-  )
+  #downloadIfNotPresent(
+  #  'https://gitlab.archlinux.org/archlinux/arch-boxes/-/package_files/13561/download',
+  #  localArchImageShaPath,
+  #)
 
   let actualSha = (['sha256sum', localArchImagePath]&!).stdout.split(' ')[0]
   let correctSha = (<- localArchImageShaPath).split(' ')[0]
@@ -67,9 +65,24 @@ func bootstrapArch() {
   }
 }
 
+func testDeps() {
+  let deps = [
+    # qemu-base
+    'qemu-img',
+    # tigervnc
+    'vncviewer',
+  ]
+
+  for dep in deps {
+    ['which', dep]!
+  }
+}
+
 with ($cwd = $scriptDir) {
+  testDeps()
   testKVM()
-  testQEMU()
   bootstrapDisk()
   bootstrapArch()
+
+  print('Successfully bootstrapped environment!')
 }

@@ -1,0 +1,12 @@
+#!/usr/bin/env sloth
+
+let memory = '2G'
+let driveFile = 'arch.qcow2'
+
+with ($cwd = $scriptDir) {
+  ['qemu-system-x86_64',
+    '-m', memory,
+    '-boot', 'order=d',
+    '-drive', "file=${driveFile},format=qcow2",
+  ]!
+}
