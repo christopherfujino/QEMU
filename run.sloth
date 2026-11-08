@@ -15,13 +15,13 @@ do {
   )
 }
 
-# qemu-system-x86_64 disk_image -nic user,hostfwd=tcp::60022-:22
 with ($cwd = $scriptDir) {
   let cmd = ['qemu-system-x86_64',
     '-m', memory,
     '-smp', "cpus=${guestCores}",
     '-boot', 'order=d',
     '-drive', "file=${driveFile},format=qcow2",
+    # Forward host SSH port to guest
     '-nic', "user,hostfwd=tcp::${hostSSHPort}-:${guestSSHPort}",
     '-monitor', 'stdio',
     # kvm = kernel-based virtual machine, baked into linux kernel
