@@ -2,11 +2,22 @@
 
 let memory = '2G'
 let driveFile = 'arch.qcow2'
+let user = 'arch'
+let hostSSHPort = '2222'
+let guestSSHPort = '22'
 
+# qemu-system-x86_64 disk_image -nic user,hostfwd=tcp::60022-:22
 with ($cwd = $scriptDir) {
-  ['qemu-system-x86_64',
+  let cmd = ['qemu-system-x86_64',
     '-m', memory,
     '-boot', 'order=d',
     '-drive', "file=${driveFile},format=qcow2",
-  ]!
+    '-nic', "user,hostfwd=tcp::${hostSSHPort}-:${guestSSHPort}",
+    '-monitor', 'stdio',
+    # kvm = kernel-based virtual machine, baked into linux kernel
+    # verify this from monitor with `info kvm`
+    '-enable-kvm',
+  ]
+  print(cmd.join(' '))
+  cmd!
 }
