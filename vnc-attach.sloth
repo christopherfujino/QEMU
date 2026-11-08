@@ -1,0 +1,14 @@
+#!/usr/bin/env sloth
+
+let host = $argv[0]
+
+let ssh = ['ssh',
+  # No remote command (i.e. just forward ports)
+  '-N',
+  # forward localport:targethost:targetport
+  '-L', "5900:localhost:5900",
+  host]&
+
+print("Spawned SSH tunnel at port 5900")
+['vncviewer', ':5900']!
+ssh.kill()
