@@ -1,0 +1,7 @@
+#!/usr/bin/env sloth
+
+let user = 'arch'
+let host = $argv[0]
+let port = '2222'
+
+"ssh -p ${port} ${user}@${host}"!
