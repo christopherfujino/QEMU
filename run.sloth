@@ -1,15 +1,25 @@
 #!/usr/bin/env sloth
 
 let memory = '2G'
+let guestCores = 4
 let driveFile = 'arch.qcow2'
 let user = 'arch'
 let hostSSHPort = '2222'
 let guestSSHPort = '22'
 
+do {
+  let hostCores = Number(('nproc'&!).stdout.trim())
+  assert(
+    guestCores <= hostCores,
+    "Your host only has ${hostCores} cores, less than desired ${guestCores}",
+  )
+}
+
 # qemu-system-x86_64 disk_image -nic user,hostfwd=tcp::60022-:22
 with ($cwd = $scriptDir) {
   let cmd = ['qemu-system-x86_64',
     '-m', memory,
+    '-smp', "cpus=${guestCores}",
     '-boot', 'order=d',
     '-drive', "file=${driveFile},format=qcow2",
     '-nic', "user,hostfwd=tcp::${hostSSHPort}-:${guestSSHPort}",
