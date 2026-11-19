@@ -11,5 +11,6 @@ let ssh = ['ssh',
 
 print("Spawned SSH tunnel at port 5900")
 ['vncviewer', ':5900']!
+
 # ssh.kill()
 exit(0)

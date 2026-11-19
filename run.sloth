@@ -29,5 +29,6 @@ with ($cwd = $scriptDir) {
     '-enable-kvm',
   ]
   print(cmd.join(' '))
+  print("To gracefully shut down guest, issue the command `system_powerdown`")
   cmd!
 }
